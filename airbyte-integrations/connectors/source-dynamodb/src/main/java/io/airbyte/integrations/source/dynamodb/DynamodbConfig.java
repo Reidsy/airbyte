@@ -20,6 +20,8 @@ public record DynamodbConfig(
 
                              String secretKey,
 
+                             String roleArn,
+
                              List<String> reservedAttributeNames,
 
                              boolean ignoreMissingPermissions
@@ -30,6 +32,7 @@ public record DynamodbConfig(
     JsonNode credentials = jsonNode.get("credentials");
     JsonNode accessKeyId = credentials.get("access_key_id");
     JsonNode secretAccessKey = credentials.get("secret_access_key");
+    JsonNode roleArn = credentials.get("role_arn");
 
     JsonNode endpoint = jsonNode.get("endpoint");
     JsonNode region = jsonNode.get("region");
@@ -40,6 +43,7 @@ public record DynamodbConfig(
         region != null && !region.asText().isBlank() ? Region.of(region.asText()) : null,
         accessKeyId != null && !accessKeyId.asText().isBlank() ? accessKeyId.asText() : null,
         secretAccessKey != null && !secretAccessKey.asText().isBlank() ? secretAccessKey.asText() : null,
+        roleArn != null && !roleArn.asText().isBlank() ? roleArn.asText() : null,
         attributeNames != null ? Arrays.asList(attributeNames.asText().split("\\s*,\\s*")) : List.of(),
         missingPermissions != null ? missingPermissions.asBoolean() : false);
   }
