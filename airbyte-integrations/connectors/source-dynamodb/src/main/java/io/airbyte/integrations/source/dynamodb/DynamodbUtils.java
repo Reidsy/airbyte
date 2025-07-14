@@ -24,6 +24,7 @@ import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import software.amazon.awssdk.services.sts.StsClient;
 import software.amazon.awssdk.services.sts.auth.StsAssumeRoleCredentialsProvider;
 import software.amazon.awssdk.services.sts.model.AssumeRoleRequest;
 
@@ -46,13 +47,18 @@ public class DynamodbUtils {
       LOGGER.info("Using Role Based Access with provided role ARN");
 
       AssumeRoleRequest assumeRoleRequest = AssumeRoleRequest.builder()
-              .roleArn(dynamodbConfig.roleArn())
-              // .roleSessionName("CrossAccountDynamoRole")
-              .build();
+        .roleArn(dynamodbConfig.roleArn())
+        .roleSessionName("airbyte-source-dynamodb")
+        .build();
+
+      StsClient stsClient = StsClient.builder()
+        .region(dynamodbConfig.region())
+        .build();
 
       StsAssumeRoleCredentialsProvider provider = StsAssumeRoleCredentialsProvider.builder()
-              .refreshRequest(assumeRoleRequest)
-              .build();
+        .stsClient(stsClient)
+        .refreshRequest(assumeRoleRequest)
+        .build();
       
       awsCredentialsProvider = provider;
 
@@ -61,6 +67,26 @@ public class DynamodbUtils {
       // awsCredentialsProvider = StsAssumeRoleCredentialsProvider.builder()
       //     .refreshRequest(StsAssumeRoleRefreshRequest.builder().roleArn(dynamodbConfig.roleArn()).build())
       //     .build();
+
+    // final AssumeRoleRequest assumeRoleRequest = AssumeRoleRequest
+    //    .builder()
+    //    .roleSessionName(UUID.randomUUID().toString())
+    //    .roleArn("roleArn")
+    //    .build();
+    // final StsClient stsClient = StsClient
+    //    .builder()
+    //    .region(Region.EU_WEST_1)
+    //    .build();
+    // final StsAssumeRoleCredentialsProvider  stsAssumeRoleCredentialsProvider = StsAssumeRoleCredentialsProvider
+    //    .builder()
+    //    .stsClient(stsClient)
+    //    .refreshRequest(assumeRoleRequest)
+    //    .build();
+    // return DynamoDbClient
+    //    .builder()
+    //    .credentialsProvider(stsAssumeRoleCredentialsProvider)
+    //    .region(Region.EU_WEST_1)
+    //    .build();
     } else {
       LOGGER.info("Using Default Credentials");
       awsCredentialsProvider = DefaultCredentialsProvider.create();
