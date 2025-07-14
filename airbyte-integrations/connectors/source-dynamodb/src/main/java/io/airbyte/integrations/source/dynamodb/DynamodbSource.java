@@ -80,6 +80,10 @@ public class DynamodbSource extends BaseConnector implements Source {
     try (final var dynamodbOperations = new DynamodbOperations(dynamodbConfig)) {
 
       dynamodbOperations.listTables().forEach(table -> {
+        LOGGER.warn("source-dynamodb table: {}", table);
+        if (table.equals("transcript-access-tracking")) {
+          return;
+        }
         try {
           airbyteStreams.add(
               new AirbyteStream()
@@ -92,12 +96,14 @@ public class DynamodbSource extends BaseConnector implements Source {
                   .withSourceDefinedPrimaryKey(Collections.singletonList(dynamodbOperations.primaryKey(table)))
                   .withSupportedSyncModes(List.of(SyncMode.FULL_REFRESH, SyncMode.INCREMENTAL)));
         } catch (DynamoDbException e) {
+          LOGGER.warn("source-dynamodb Error while discovering Dynamodb table with reason: ", e);
           if (dynamodbConfig.ignoreMissingPermissions()) {
             // fragile way to check for missing read access but there is no dedicated exception for missing
             // permissions.
             if (e.getMessage().contains("not authorized")) {
-              LOGGER.warn("Connector doesn't have READ access for the table {}", table);
+              LOGGER.warn("source-dynamodb Connector doesn't have READ access for the table {}", table);
             } else {
+              LOGGER.warn("source-dynamodb Dynamodb has read access but still failed with reason: ", e);
               throw e;
             }
           } else {
@@ -105,7 +111,10 @@ public class DynamodbSource extends BaseConnector implements Source {
           }
         }
       });
+      LOGGER.warn("source-dynamodb doneListingStreams: {}", airbyteStreams);
     }
+
+    LOGGER.warn("source-dynamodb airbyteStreams: {}", airbyteStreams);
 
     return new AirbyteCatalog().withStreams(airbyteStreams);
   }

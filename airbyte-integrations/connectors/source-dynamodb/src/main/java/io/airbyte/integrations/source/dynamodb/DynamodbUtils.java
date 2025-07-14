@@ -61,32 +61,6 @@ public class DynamodbUtils {
         .build();
       
       awsCredentialsProvider = provider;
-
-        // DynamoDbClient client = DynamoDbClient.builder().credentialsProvider(provider).build();
-
-      // awsCredentialsProvider = StsAssumeRoleCredentialsProvider.builder()
-      //     .refreshRequest(StsAssumeRoleRefreshRequest.builder().roleArn(dynamodbConfig.roleArn()).build())
-      //     .build();
-
-    // final AssumeRoleRequest assumeRoleRequest = AssumeRoleRequest
-    //    .builder()
-    //    .roleSessionName(UUID.randomUUID().toString())
-    //    .roleArn("roleArn")
-    //    .build();
-    // final StsClient stsClient = StsClient
-    //    .builder()
-    //    .region(Region.EU_WEST_1)
-    //    .build();
-    // final StsAssumeRoleCredentialsProvider  stsAssumeRoleCredentialsProvider = StsAssumeRoleCredentialsProvider
-    //    .builder()
-    //    .stsClient(stsClient)
-    //    .refreshRequest(assumeRoleRequest)
-    //    .build();
-    // return DynamoDbClient
-    //    .builder()
-    //    .credentialsProvider(stsAssumeRoleCredentialsProvider)
-    //    .region(Region.EU_WEST_1)
-    //    .build();
     } else {
       LOGGER.info("Using Default Credentials");
       awsCredentialsProvider = DefaultCredentialsProvider.create();
