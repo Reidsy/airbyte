@@ -24,6 +24,9 @@ import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import software.amazon.awssdk.services.sts.StsClient;
+import software.amazon.awssdk.services.sts.auth.StsAssumeRoleCredentialsProvider;
+import software.amazon.awssdk.services.sts.model.AssumeRoleRequest;
 
 public class DynamodbUtils {
 
@@ -40,8 +43,26 @@ public class DynamodbUtils {
       LOGGER.info("Creating credentials using access key and secret key");
       AwsCredentials awsCreds = AwsBasicCredentials.create(dynamodbConfig.accessKey(), dynamodbConfig.secretKey());
       awsCredentialsProvider = StaticCredentialsProvider.create(awsCreds);
+    } else if (!StringUtils.isBlank(dynamodbConfig.roleArn())) {
+      LOGGER.info("Using Role Based Access with provided role ARN");
+
+      AssumeRoleRequest assumeRoleRequest = AssumeRoleRequest.builder()
+        .roleArn(dynamodbConfig.roleArn())
+        .roleSessionName("airbyte-source-dynamodb")
+        .build();
+
+      StsClient stsClient = StsClient.builder()
+        .region(dynamodbConfig.region())
+        .build();
+
+      StsAssumeRoleCredentialsProvider provider = StsAssumeRoleCredentialsProvider.builder()
+        .stsClient(stsClient)
+        .refreshRequest(assumeRoleRequest)
+        .build();
+      
+      awsCredentialsProvider = provider;
     } else {
-      LOGGER.info("Using Role Based Access");
+      LOGGER.info("Using Default Credentials");
       awsCredentialsProvider = DefaultCredentialsProvider.create();
     }
 

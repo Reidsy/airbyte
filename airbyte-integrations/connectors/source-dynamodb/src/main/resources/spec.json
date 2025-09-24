@@ -50,6 +50,15 @@
                 "type": "string",
                 "const": "Role",
                 "order": 0
+              },
+              "role_arn": {
+                "order": 1,
+                "title": "Role ARN",
+                "type": "string",
+                "description": "The ARN of the role to assume",
+                "default": "",
+                "airbyte_secret": true,
+                "examples": ["arn:aws:iam::123456789012:role/AirbyteRole"]
               }
             }
           }
